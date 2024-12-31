@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <!-- Include SignalR JavaScript library -->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+</head>
+<body>
+    <h1>Welcome, Admin</h1>
+    <script>
+        // Create the SignalR connection
+       const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/VideoCallHub") // This should match the server-side configuration
+        .build();
+        //const adminId = "anuj1902";
+        //const connection = new signalR.HubConnectionBuilder()
+        //    .withUrl(`/VideoCallHub?adminId=${encodeURIComponent(adminId)}`)
+        //    .build();
+
+
+connection.on("ReceiveCallNotification", function (jitsiRoomUrl) {
+    console.log("Received call notification with URL:", jitsiRoomUrl);
+    if (confirm("Incoming video call. Do you want to accept?")) {
+        connection.invoke("AcceptCall", jitsiRoomUrl)
+            .then(() => console.log("Call accepted"))
+            .catch(err => console.error("Error accepting call:", err));
+        // window.open(jitsiRoomUrl, '_blank');
+        window.location.href = jitsiRoomUrl;
+    } else {
+        connection.invoke("RejectCall", jitsiRoomUrl)
+            .then(() => console.log("Call rejected"))
+            .catch(err => console.error("Error rejecting call:", err));
+    }
+});
+
+connection.start()
+    .then(() => console.log("SignalR connection established."))
+    .catch(err => console.error("SignalR connection error:", err));
+
+    </script>
+</body>
+</html>
